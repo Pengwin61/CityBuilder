@@ -1,109 +1,50 @@
-﻿using System;
-using System.Collections;
+﻿using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
-namespace Loadings
+namespace Loading
 {
     public interface ILoading
     {
-        void Load();
-        bool IsLoaded { get; }
+        UniTask Load(CancellationToken cancelLoading);
     }
-
 
     public class LoadingSteps
     {
-        protected List<ILoading> steps = new List<ILoading>();
+        protected Queue<ILoading> steps;
 
-        public void AddStep(Action init, Func<bool> isLoad)
+        public LoadingSteps(params ILoading[] loadings)
         {
-            AddStep(new Initializer(init, isLoad));
-        }
-
-        public void AddStep(Action init)
-        {
-            AddStep(new Initializer(init));
-        }
-
-        public void AddStep(ILoading loading)
-        {
-            steps.Add(loading);
+            steps = new Queue<ILoading>(loadings);
         }
     }
 
     public class LoadingInTurn : LoadingSteps, ILoading
     {
-        public bool IsLoaded { get; set; }
+        public LoadingInTurn(params ILoading[] loadings) : base(loadings) { }
 
-        public void Load()
+        public async UniTask Load(CancellationToken cancelLoading)
         {
-            CoroutineContainer.Start(LoadInTurn());
-        }
-
-        public IEnumerator LoadInTurn()
-        {
-            var initAssets = steps.GetEnumerator();
-            while (initAssets.MoveNext())
+            await UniTask.NextFrame(cancelLoading);
+            while (steps.Count > 0)
             {
-                yield return Yielders.EndOfFrame;
-                var asset = initAssets.Current;
-                asset.Load();
-                while (!asset.IsLoaded)
-                {
-                    yield return Yielders.EndOfFrame;
-                }
+                await steps.Dequeue().Load(cancelLoading);
             }
-            IsLoaded = true;
         }
     }
 
     public class LoadingAsync : LoadingSteps, ILoading
     {
-        public bool IsLoaded
-        {
-            get
-            {
-                for (int i = 0; i < steps.Count; i++)
-                {
-                    if (!steps[i].IsLoaded)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
+        public LoadingAsync(params ILoading[] loadings) : base(loadings) { }
 
-        public void Load()
+        public async UniTask Load(CancellationToken cancelLoading)
         {
-            for (int i = 0; i < steps.Count; i++)
-            {
-                steps[i].Load();
-            }
-        }
-    }
-
-    public class Initializer : ILoading
-    {
-        private readonly Action initializedAction;
-        private readonly Func<bool> isLoadAction;
-
-        public Initializer(Action init)
-        {
-            initializedAction = init;
-            isLoadAction = () => true;
-        }
-        public Initializer(Action init, Func<bool> isLoaded)
-        {
-            initializedAction = init;
-            isLoadAction = isLoaded;
-        }
-
-        public bool IsLoaded => isLoadAction();
-
-        public void Load()
-        {
-            initializedAction?.Invoke();
+            var loading = steps
+                .Select(step => step.Load(cancelLoading))
+                .ToArray();
+            steps.Clear();
+            await UniTask.WhenAll(loading);
         }
     }
 }

@@ -1,18 +1,28 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Cysharp.Threading.Tasks;
+using Loading.Steps;
+using System.Threading;
 
-public class MainLoading : MonoBehaviour
+namespace Loading
 {
-    // Start is called before the first frame update
-    void Start()
+    public class MainLoading
     {
-        
-    }
+        private CancellationTokenSource _cancelLoading;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public MainLoading()
+        {
+            _cancelLoading = new CancellationTokenSource();
+
+            var mainLoading = new LoadingInTurn(
+                 new ConfigStep(),
+                 new MainLoadingCompleteStep()
+                 );
+
+            mainLoading.Load(_cancelLoading.Token).Forget();
+        }
+
+        public void StopLoading()
+        {
+            _cancelLoading.Cancel();
+        }
     }
 }
