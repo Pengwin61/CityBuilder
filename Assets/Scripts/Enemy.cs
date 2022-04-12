@@ -21,9 +21,6 @@ public class Enemy : MonoBehaviour
     }
 
 
-
-
-
     void Update()
     {
         Move();

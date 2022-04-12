@@ -2,13 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+public enum PoolType
+{
+    Enemy1=1,
+    Enemy2=2,
+    Enemy3=3
+}
+
+
+
 public class ObjectPooler : MonoBehaviour
 {
 
-    [System.Serializable]
+   [System.Serializable]
     public class Pool
     {
-        public string tag;
+        public PoolType type;
         public GameObject prefab;
         public int size;
     }
@@ -25,44 +35,94 @@ public class ObjectPooler : MonoBehaviour
     #endregion
 
 
-    public List<Pool> pools;
-    public Dictionary<string, Queue<GameObject>> poolDictionary;
+    [SerializeField] 
+    private List<Pool> pools;
+    private Dictionary<PoolType, Queue<GameObject>> poolDictionary;
+
+    [SerializeField]
+    private Transform _container;
 
 
-    void Start()
+    public static void Init()
     {
-        poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        Instance.Initialization();
+    }
+
+    public static GameObject GetObject(PoolType poolType, Vector3 position, Quaternion rotation)
+    {
+        return Instance.SpawnFromPool(poolType, position, rotation);
+    }
+
+    public static void PushBack(GameObject obj)
+    {
+        
+    }
+
+    private void CreateObject(GameObject prefab, PoolType poolType)
+    {
+        GameObject obj = Instantiate(prefab);
+        Push(obj,poolType);
+
+    }
+
+    private void Push(GameObject prefab, PoolType poolType)
+    {
+        prefab.transform.SetParent(_container);
+
+
+        //Нужно сохранить , получает в словаре нужную очередь
+        // Получить или как параметр в метод
+        // Или вместо геймобжекта передавать другую структуру где будет и префаб или PooleType
+        poolDictionary[poolType].Enqueue(prefab);
+        
+    }
+
+
+
+    private void Initialization()
+    {
+        poolDictionary = new Dictionary<PoolType, Queue<GameObject>>();
 
         foreach (Pool pool in pools)
         {
+            // Вызываем метод добавить пул CreateObject
+            
             Queue<GameObject> objectPool = new Queue<GameObject>();
+
+            poolDictionary.Add(pool.type, objectPool);
 
             for (int i = 0; i < pool.size; i++)
             {
-                GameObject obj = Instantiate(pool.prefab);
-                obj.SetActive(false);
-                objectPool.Enqueue(obj);
+                CreateObject(pool.prefab,pool.type);
             }
-            poolDictionary.Add(pool.tag, objectPool);
+            
         }
     }
 
-    public GameObject SpawnFromPool(string tag, Vector3 position, Quaternion rotation)
+
+
+
+    private GameObject SpawnFromPool(PoolType poolType, Vector3 position, Quaternion rotation)
     {
-        if (!poolDictionary.ContainsKey(tag))
+        if (!poolDictionary.ContainsKey(poolType))
         {
             Debug.LogWarning("Pool with tag " + tag + "doesn't excist.");
             return null;
         }
 
-        GameObject objectToSpawn = poolDictionary[tag].Dequeue();
+        // Переделать метод Криейт
 
-        objectToSpawn.SetActive(true);
+        GameObject objectToSpawn = poolDictionary[poolType].Dequeue();
+
         objectToSpawn.transform.position = position;
         objectToSpawn.transform.rotation = rotation;
 
-        poolDictionary[tag].Enqueue(objectToSpawn);
 
         return objectToSpawn;
     }
+
+
+
+
+
 }
