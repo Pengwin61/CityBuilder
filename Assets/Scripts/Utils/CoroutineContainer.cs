@@ -57,7 +57,7 @@ namespace Utils
         {
             if (onMonoBeh == null || !onMonoBeh.isActiveAndEnabled)
             {
-                DebugCustom.LogWarning("Trying to start coroutine on destroyed or inactive MonoBehaviour. Return null without consequences");
+                DebugUtils.LogWarning("Trying to start coroutine on destroyed or inactive MonoBehaviour. Return null without consequences");
                 return null;
             }
             return onMonoBeh.StartCoroutine(DelayActionRoutine(yielder, action));
@@ -66,7 +66,7 @@ namespace Utils
         {
             if (onMonoBeh == null || !onMonoBeh.isActiveAndEnabled)
             {
-                DebugCustom.LogWarning("Trying to start coroutine on destroyed or inactive MonoBehaviour. Return null without consequences");
+                DebugUtils.LogWarning("Trying to start coroutine on destroyed or inactive MonoBehaviour. Return null without consequences");
                 return null;
             }
             return onMonoBeh.StartCoroutine(DelayActionRoutine(yielder, action));

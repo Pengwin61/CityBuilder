@@ -6,7 +6,7 @@ namespace Loading
 {
     public class MainLoading
     {
-        private CancellationTokenSource _cancelLoading;
+        private readonly CancellationTokenSource _cancelLoading;
 
         public MainLoading()
         {
@@ -14,6 +14,7 @@ namespace Loading
 
             var mainLoading = new LoadingInTurn(
                  new ConfigStep(),
+                 new WindowsStep(),
                  new MainLoadingCompleteStep()
                  );
 

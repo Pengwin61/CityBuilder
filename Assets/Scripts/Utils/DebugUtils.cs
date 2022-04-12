@@ -17,7 +17,7 @@ namespace Utils
         Loading = 1 << 1
     }
 
-    public class DebugCustom : Debug
+    public class DebugUtils : Debug
     {
 
         public static LogContext logContext = 0;
