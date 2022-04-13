@@ -7,7 +7,6 @@ public class ObjectPooler : MonoBehaviour
     public class Pool
     {
         public string path;
-        public GameObject prefab;
         public int size;
     }
 
@@ -30,18 +29,19 @@ public class ObjectPooler : MonoBehaviour
 
     public static void PushBack(GameObject obj)
     {
-
+        _instance.Push(obj);
     }
 
     private void CreateObject(string path)
     {
         var obj = PrefabLoader.GetObject(path);
         obj.name = path;
-        Push(path, obj);
+        Push(obj);
     }
 
-    private void Push(string path, GameObject prefab)
+    private void Push(GameObject prefab)
     {
+        var path = prefab.name;
         prefab.transform.SetParent(_container);
         if (poolDictionary.ContainsKey(path) is false)
         {
@@ -65,13 +65,12 @@ public class ObjectPooler : MonoBehaviour
 
     private GameObject SpawnFromPool(string path)
     {
-        if (!poolDictionary.ContainsKey(path))
+        if (!poolDictionary.ContainsKey(path) || poolDictionary[path].Count == 0)
         {
-            Debug.LogWarning($"Pool obj with path {path} doesn't excist.");
-            return null;
+            CreateObject(path);
         }
         var objectToSpawn = poolDictionary[path].Dequeue();
-
+        objectToSpawn.transform.SetParent(null);
         return objectToSpawn;
     }
 

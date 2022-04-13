@@ -18,7 +18,7 @@ public class EnemySpawner : MonoBehaviour
         {
             //ObjectPooler.GetObject("Enemy2", transform.position, Quaternion.identity);
             //ObjectPooler.GetObject("Enemy1", transform.position, Quaternion.identity);
-           var enemy = ObjectPooler.GetObject("Enemy1").transform;
+           var enemy = ObjectPooler.GetObject("Enemies/Enemy1").transform;
 
             enemy.position = transform.position;
             enemy.rotation = Quaternion.identity;

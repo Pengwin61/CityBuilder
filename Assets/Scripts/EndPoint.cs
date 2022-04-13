@@ -11,7 +11,7 @@ public class EndPoint : MonoBehaviour
         GameObject enemyGO = collision.gameObject;
         if (enemyGO.tag == "Enemy")
         {
-            enemyGO.SetActive(false);
+            ObjectPooler.PushBack(enemyGO);
             print("Я выключил " + enemyGO.name);
         }
         else
