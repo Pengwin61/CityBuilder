@@ -1,128 +1,82 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public enum PoolType
-{
-    Enemy1=1,
-    Enemy2=2,
-    Enemy3=3
-}
-
-
-
 public class ObjectPooler : MonoBehaviour
 {
-
-   [System.Serializable]
+    [System.Serializable]
     public class Pool
     {
-        public PoolType type;
+        public string path;
         public GameObject prefab;
         public int size;
     }
 
-    #region Singleton
+    private static ObjectPooler _instance;
 
-    public static ObjectPooler Instance;
+    [SerializeField] private List<Pool> pools;
+    [SerializeField] private Transform _container;
 
-    private void Awake()
-    {
-        Instance = this;
-    }
-
-    #endregion
-
-
-    [SerializeField] 
-    private List<Pool> pools;
-    private Dictionary<PoolType, Queue<GameObject>> poolDictionary;
-
-    [SerializeField]
-    private Transform _container;
-
+    private Dictionary<string, Queue<GameObject>> poolDictionary;
 
     public static void Init()
     {
-        Instance.Initialization();
+        _instance.CreateStartPoolObjects();
     }
 
-    public static GameObject GetObject(PoolType poolType, Vector3 position, Quaternion rotation)
+    public static GameObject GetObject(string path)
     {
-        return Instance.SpawnFromPool(poolType, position, rotation);
+        return _instance.SpawnFromPool(path);
     }
 
     public static void PushBack(GameObject obj)
     {
-        
+
     }
 
-    private void CreateObject(GameObject prefab, PoolType poolType)
+    private void CreateObject(string path)
     {
-        GameObject obj = Instantiate(prefab);
-        Push(obj,poolType);
-
+        var obj = PrefabLoader.GetObject(path);
+        obj.name = path;
+        Push(path, obj);
     }
 
-    private void Push(GameObject prefab, PoolType poolType)
+    private void Push(string path, GameObject prefab)
     {
         prefab.transform.SetParent(_container);
-
-
-        //Нужно сохранить , получает в словаре нужную очередь
-        // Получить или как параметр в метод
-        // Или вместо геймобжекта передавать другую структуру где будет и префаб или PooleType
-        poolDictionary[poolType].Enqueue(prefab);
-        
+        if (poolDictionary.ContainsKey(path) is false)
+        {
+            poolDictionary.Add(path, new Queue<GameObject>());
+        }
+        poolDictionary[path].Enqueue(prefab);
     }
 
-
-
-    private void Initialization()
+    private void CreateStartPoolObjects()
     {
-        poolDictionary = new Dictionary<PoolType, Queue<GameObject>>();
+        poolDictionary = new Dictionary<string, Queue<GameObject>>();
 
         foreach (Pool pool in pools)
         {
-            // Вызываем метод добавить пул CreateObject
-            
-            Queue<GameObject> objectPool = new Queue<GameObject>();
-
-            poolDictionary.Add(pool.type, objectPool);
-
             for (int i = 0; i < pool.size; i++)
             {
-                CreateObject(pool.prefab,pool.type);
+                CreateObject(pool.path);
             }
-            
         }
     }
 
-
-
-
-    private GameObject SpawnFromPool(PoolType poolType, Vector3 position, Quaternion rotation)
+    private GameObject SpawnFromPool(string path)
     {
-        if (!poolDictionary.ContainsKey(poolType))
+        if (!poolDictionary.ContainsKey(path))
         {
-            Debug.LogWarning("Pool with tag " + tag + "doesn't excist.");
+            Debug.LogWarning($"Pool obj with path {path} doesn't excist.");
             return null;
         }
-
-        // Переделать метод Криейт
-
-        GameObject objectToSpawn = poolDictionary[poolType].Dequeue();
-
-        objectToSpawn.transform.position = position;
-        objectToSpawn.transform.rotation = rotation;
-
+        var objectToSpawn = poolDictionary[path].Dequeue();
 
         return objectToSpawn;
     }
 
-
-
-
-
+    private void Awake()
+    {
+        _instance = this;
+    }
 }
