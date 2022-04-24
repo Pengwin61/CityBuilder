@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Pool
 {
-    public interface IPoolCreator
+    public interface IObjectCreator
     {
         public string Path { get; }
         public void CreateObj();

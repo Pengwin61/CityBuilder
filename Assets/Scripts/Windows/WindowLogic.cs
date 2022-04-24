@@ -4,16 +4,11 @@ namespace Windows
 {
     public interface IWindowData { }
 
-    public class WindowLogic : IPoolCreator
+    public abstract class WindowLogic : IObjectCreator
     {
         protected WindowView windowView;
 
         public virtual string Path { get; }
-
-        public virtual void Open()
-        {
-            SetVisible(true);
-        }
 
         public virtual void Open(IWindowData data)
         {
@@ -22,22 +17,25 @@ namespace Windows
 
         public virtual void Close()
         {
-            SetVisible(false);
+            ObjectPooler.PushBack(windowView.gameObject);
+            WindowsController.OnClose(this);
         }
 
         public virtual void SetVisible(bool isActive)
         {
-
+            windowView.SetVisible(isActive);
         }
 
         public virtual void BackBehaviour()
         {
-
+            Close();
         }
 
         public void CreateObj()
         {
-            windowView = PrefabLoader.GetObject<WindowView>(Path);
+            windowView = ObjectPooler.GetObject(Path).GetComponent<WindowView>();
+            windowView.SetLogic(this);
+            HUD.InterfaceController.ShowWindow(windowView);
         }
     }
 }
