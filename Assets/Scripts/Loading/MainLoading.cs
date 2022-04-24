@@ -15,9 +15,9 @@ namespace Loading
         {
             _cancelLoading = new CancellationTokenSource();
 
-            var mainLoading = new LoadingInTurn(
-                 new ConfigStep(),
-                 new MainLoadingCompleteStep()
+            var mainLoading = new LoadingAsync(
+                  new ConfigStep(),
+                  new MainLoadingCompleteStep()
                  );
 
             WindowsController.Open<WindowLoading>(new LoadingData { steps = mainLoading });
@@ -29,19 +29,19 @@ namespace Loading
             _cancelLoading.Cancel();
         }
 
-        public class Test : ILoading
+        public class LoadingTest : ILoading
         {
-            private int delay;
+            private readonly int _delay;
 
-            public Test(int delay)
+            public LoadingTest(int delay)
             {
-                this.delay = delay;
+                _delay = delay;
             }
 
             public async UniTask Load(CancellationToken cancelLoading)
             {
-                await UniTask.Delay(delay);
-                Debug.LogError($"complete {delay}");
+                await UniTask.Delay(_delay);
+                Debug.LogError($"complete {_delay}");
             }
         }
     }
