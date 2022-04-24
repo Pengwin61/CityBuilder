@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Utils;
 
 namespace Windows
@@ -14,7 +13,11 @@ namespace Windows
             return Instance._openedWindows.Any(window => window is Window);
         }
 
-        public static void Open<Window>(IWindowData data = null) where Window : WindowLogic, new()
+        public static void Open<Window>() where Window : WindowLogic, new()
+        {
+            Instance.OpenInternal<Window>();
+        }
+        public static void Open<Window>(IWindowData data) where Window : WindowLogic, new()
         {
             Instance.OpenInternal<Window>(data);
         }
@@ -25,24 +28,38 @@ namespace Windows
         }
 
         private readonly List<WindowLogic> _openedWindows = new List<WindowLogic>();
-    
+
+        private void OpenInternal<Window>() where Window : WindowLogic, new()
+        {
+            OpeningWindow<Window>().Open();
+        }
         private void OpenInternal<Window>(IWindowData data = null) where Window : WindowLogic, new()
         {
-            OpeningWindow<Window>().Open(data); 
+            OpeningWindow<Window>().Open(data);
         }
 
         private void OnCloseInternal(WindowLogic windowLogic)
         {
             _openedWindows.Remove(windowLogic);
-            ActiveWindow.SetVisible(true);
+            SetActiveWindowVisible(true);
         }
 
         private Window OpeningWindow<Window>() where Window : WindowLogic, new()
         {
-            ActiveWindow.SetVisible(false);
+            SetActiveWindowVisible(false);
             var newWindow = new Window();
             _openedWindows.Add(newWindow);
+            newWindow.SetupViewObj();
             return newWindow;
+        }
+
+        private void SetActiveWindowVisible(bool isActive)
+        {
+            if (ActiveWindow == null)
+            {
+                return;
+            }
+            ActiveWindow.SetVisible(isActive);
         }
     }
 }

@@ -15,16 +15,16 @@ public class ObjectPooler : MonoBehaviour
     [SerializeField] private List<Pool> pools;
     [SerializeField] private Transform _container;
 
-    private Dictionary<string, Queue<GameObject>> poolDictionary;
+    private readonly Dictionary<string, Queue<GameObject>> poolDictionary = new Dictionary<string, Queue<GameObject>>();
 
     public static void Init()
     {
         _instance.CreateStartPoolObjects();
     }
 
-    public static GameObject GetObject(string path)
+    public static bool TryGetObject(string path, out GameObject obj)
     {
-        return _instance.SpawnFromPool(path);
+        return _instance.TrySpawnFromPool(path, out obj);
     }
 
     public static void PushBack(GameObject obj)
@@ -32,11 +32,15 @@ public class ObjectPooler : MonoBehaviour
         _instance.Push(obj);
     }
 
-    private void CreateObject(string path)
+    private bool TryCreateObject(string path)
     {
-        var obj = PrefabLoader.GetObject(path);
+        if (PrefabLoader.TryGetObject<GameObject>(path, out var obj) is false)
+        {
+            return false;
+        }
         obj.name = path;
         Push(obj);
+        return true;
     }
 
     private void Push(GameObject prefab)
@@ -52,26 +56,33 @@ public class ObjectPooler : MonoBehaviour
 
     private void CreateStartPoolObjects()
     {
-        poolDictionary = new Dictionary<string, Queue<GameObject>>();
-
         foreach (Pool pool in pools)
         {
             for (int i = 0; i < pool.size; i++)
             {
-                CreateObject(pool.path);
+                var isSuccess = TryCreateObject(pool.path);
+                if (isSuccess is false)
+                {
+                    break;
+                }
             }
         }
     }
 
-    private GameObject SpawnFromPool(string path)
+    private bool TrySpawnFromPool(string path, out GameObject objectToSpawn)
     {
         if (!poolDictionary.ContainsKey(path) || poolDictionary[path].Count == 0)
         {
-            CreateObject(path);
+            var isSuccess = TryCreateObject(path);
+            if (isSuccess is false)
+            {
+                objectToSpawn = default;
+                return false;
+            }
         }
-        var objectToSpawn = poolDictionary[path].Dequeue();
+        objectToSpawn = poolDictionary[path].Dequeue();
         objectToSpawn.transform.SetParent(null);
-        return objectToSpawn;
+        return true;
     }
 
     private void Awake()

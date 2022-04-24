@@ -1,23 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-
     private void Start()
     {
         ObjectPooler.Init();
     }
 
-
-
     private void Update()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) && 
+            ObjectPooler.TryGetObject("Enemies/Enemy1", out var enemyObj))
         {
-           var enemy = ObjectPooler.GetObject("Enemies/Enemy1").transform;
-
+            var enemy = enemyObj.transform;
             enemy.position = transform.position;
             enemy.rotation = Quaternion.identity;
         }

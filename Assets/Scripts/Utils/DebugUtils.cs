@@ -24,35 +24,35 @@ namespace Utils
 
         public static void Log(string message, LogContext context = LogContext.General)
         {
-            Debug.Log($"[{context}] {message}");
+            Debug.Log(AddContext(message, context));
         }
 
         public static void LogWarning(string message, LogContext context = LogContext.General)
         {
-            Debug.LogWarning($"[{context}] {message}");
+            Debug.LogWarning(AddContext(message, context));
         }
 
         public static void LogError(string message, LogContext context = LogContext.General)
         {
-            Debug.LogError($"[{context}] {message}");
+            Debug.LogError(AddContext(message, context));
         }
 
         public static void LogList<T>(IEnumerable<T> list, string message, LogContext context = LogContext.General)
         {
             message = GetListMessage(list, message);
-            Debug.Log($"[{context}] {message}");
+            Debug.Log(AddContext(message, context));
         }
 
         public static void LogListWarning<T>(IEnumerable<T> list, string message, LogContext context = LogContext.General)
         {
             message = GetListMessage(list, message);
-            Debug.LogWarning($"[{context}] {message}");
+            Debug.LogWarning(AddContext(message, context));
         }
 
         public static void LogListError<T>(IEnumerable<T> list, string message, LogContext context = LogContext.General)
         {
             message = GetListMessage(list, message);
-            Debug.LogError($"[{context}] {message}");
+            Debug.LogError(AddContext(message, context));
         }
 
         private static string GetListMessage<T>(IEnumerable<T> list, string message)
@@ -71,6 +71,15 @@ namespace Utils
                 }
             }
             return text;
+        }
+
+        private static string AddContext(string message, LogContext context)
+        {
+            if (context != LogContext.General)
+            {
+                message = $"[{context}] {message}";
+            }
+            return message;
         }
     }
 }

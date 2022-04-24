@@ -1,4 +1,3 @@
-using Pool;
 using Utils;
 
 namespace HUD
@@ -7,16 +6,21 @@ namespace HUD
     {
         private const string PATH = "HUD";
 
-        private InterfaceView _canvasView;
+        private InterfaceView _hudView;
 
         public static void ShowWindow(Windows.WindowView windowView)
         {
-            Instance._canvasView.ShowWindow(windowView);
+            var hud = Instance._hudView;
+            if (hud == null)
+            {
+                return;
+            }
+            hud.ShowWindow(windowView);
         }
 
         public InterfaceController()
         {
-            _canvasView = PrefabLoader.GetObject<InterfaceView>(PATH);
+            PrefabLoader.TryGetObject(PATH, out _hudView);
         }
     }
 }

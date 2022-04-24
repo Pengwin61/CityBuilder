@@ -2,17 +2,16 @@ using UnityEngine;
 
 public static class PrefabLoader
 {
-    public static T GetObject<T>(string path) where T: MonoBehaviour
+    public static bool TryGetObject<T>(string path, out T createdObj) where T: Object
     {
+        Utils.DebugUtils.LogError($"GetObject {path}");
         var objRes = Resources.Load<T>(path);
-        var createdObj = Object.Instantiate<T>(objRes);
-        return createdObj;
-    }
-
-    public static GameObject GetObject(string path)
-    {
-        var objRes = Resources.Load<GameObject>(path);
-        var createdObj = GameObject.Instantiate<GameObject>(objRes);
-        return createdObj;
+        if (objRes == null)
+        {
+            createdObj = default;
+            return false;
+        }
+        createdObj = Object.Instantiate<T>(objRes);
+        return true;
     }
 }

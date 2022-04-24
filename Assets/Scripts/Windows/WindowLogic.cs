@@ -1,15 +1,17 @@
-using Pool;
-
 namespace Windows
 {
     public interface IWindowData { }
 
-    public abstract class WindowLogic : IObjectCreator
+    public abstract class WindowLogic
     {
         protected WindowView windowView;
 
-        public virtual string Path { get; }
+        public abstract string Path { get; }
 
+        public virtual void Open()
+        {
+            SetVisible(true);
+        }
         public virtual void Open(IWindowData data)
         {
             SetVisible(true);
@@ -23,6 +25,10 @@ namespace Windows
 
         public virtual void SetVisible(bool isActive)
         {
+            if (windowView == null)
+            {
+                return;
+            }
             windowView.SetVisible(isActive);
         }
 
@@ -31,11 +37,26 @@ namespace Windows
             Close();
         }
 
-        public void CreateObj()
+        public void SetupViewObj()
         {
-            windowView = ObjectPooler.GetObject(Path).GetComponent<WindowView>();
+            if (ObjectPooler.TryGetObject(Path, out var windowObj) is false)
+            {
+                return;
+            }
+            windowView = windowObj.GetComponent<WindowView>();
             windowView.SetLogic(this);
             HUD.InterfaceController.ShowWindow(windowView);
+        }
+
+        protected bool TryGetWindowView<T>(out T windowView)
+        {
+            if (this.windowView != null && this.windowView is T view)
+            {
+                windowView = view;
+                return true;
+            }
+            windowView = default;
+            return false;
         }
     }
 }
