@@ -1,24 +1,25 @@
 namespace Windows.Loading
 {
-    public class WindowLoading : WindowLogic
+    public class WindowLoading : WindowLogic<LoadingView, LoadingData>
     {
         private const string PATH = "Windows/WindowLoading";
         public override string Path => PATH;
 
-        public override void Open(IWindowData data)
+        public override void Open()
         {
-            base.Open(data);
-            if (data is LoadingData loadingData)
+            base.Open();
+            if (TryGetWindowView(out var loadingView))
             {
-                OpenInteral(loadingData);
+                loadingView.SetActiveSlider(false);
             }
         }
 
-        private void OpenInteral(LoadingData loadingData)
+        protected override void Open(LoadingData loadingData)
         {
-            if (TryGetWindowView<LoadingView>(out var loadingView))
+            if (TryGetWindowView(out var loadingView))
             {
                 loadingView.SetLoadingSteps(loadingData.steps);
+                loadingView.SetActiveSlider(true);
             }
         }
     }

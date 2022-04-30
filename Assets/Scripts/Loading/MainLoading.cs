@@ -15,8 +15,15 @@ namespace Loading
         {
             _cancelLoading = new CancellationTokenSource();
 
-            var mainLoading = new LoadingAsync(
+            var mainLoading = new LoadingInTurn(
+
+                new MainLoading.LoadingTest(1500),
+                new MainLoading.LoadingTest(1000),
+                new MainLoading.LoadingTest(500),
+                new MainLoading.LoadingTest(100),
+
                   new ConfigStep(),
+                  new PoolStep(),
                   new MainLoadingCompleteStep()
                  );
 

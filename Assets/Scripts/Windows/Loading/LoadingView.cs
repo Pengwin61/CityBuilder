@@ -4,10 +4,15 @@ using UnityEngine.UI;
 
 namespace Windows.Loading
 {
-    public class LoadingView : WindowView
+    public class LoadingView : WindowView<WindowLoading>
     {
         [SerializeField] private Slider _slider;
         private LoadingSteps _steps;
+
+        public void SetActiveSlider(bool isActive)
+        {
+            _slider.gameObject.SetActive(isActive);
+        }
 
         public void SetLoadingSteps(LoadingSteps steps)
         {

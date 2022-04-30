@@ -1,4 +1,5 @@
 using Utils;
+using Windows;
 
 namespace HUD
 {
@@ -6,9 +7,9 @@ namespace HUD
     {
         private const string PATH = "HUD";
 
-        private InterfaceView _hudView;
+        private readonly InterfaceView _hudView;
 
-        public static void ShowWindow(Windows.WindowView windowView)
+        public static void ShowWindow(IWindowView windowView)
         {
             var hud = Instance._hudView;
             if (hud == null)

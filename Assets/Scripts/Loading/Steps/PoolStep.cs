@@ -1,17 +1,13 @@
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using Windows;
-using Windows.Loading;
-using Windows.Lobby;
 
 namespace Loading.Steps
 {
-    public class MainLoadingCompleteStep : ILoading
+    public class PoolStep : ILoading
     {
         public UniTask Load(CancellationToken cancelLoading)
         {
-            WindowsController.Close<WindowLoading>();
-            WindowsController.Open<WindowLobby>();
+            ObjectPooler.Init();
             return UniTask.CompletedTask;
         }
     }

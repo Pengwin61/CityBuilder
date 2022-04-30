@@ -1,58 +1,65 @@
+using UnityEngine;
+
 namespace Windows
 {
-    public interface IWindowData { }
-
-    public abstract class WindowLogic
+    public abstract class WindowLogic<View, Data> : IWindowLogic
+        where View : Component, IWindowView
+        where Data : IWindowData
     {
-        protected WindowView windowView;
+        private View _windowView;
 
         public abstract string Path { get; }
+        protected abstract void Open(Data data);
 
         public virtual void Open()
         {
             SetVisible(true);
         }
+
         public virtual void Open(IWindowData data)
         {
             SetVisible(true);
+            if (data is Data loadingData)
+            {
+                Open(loadingData);
+            }
         }
 
         public virtual void Close()
         {
-            ObjectPooler.PushBack(windowView.gameObject);
+            ObjectPooler.PushBack(_windowView.gameObject);
             WindowsController.OnClose(this);
         }
 
         public virtual void SetVisible(bool isActive)
         {
-            if (windowView == null)
+            if (TryGetWindowView(out var windowView))
             {
-                return;
+                windowView.SetVisible(isActive);
             }
-            windowView.SetVisible(isActive);
         }
 
-        public virtual void BackBehaviour()
-        {
-            Close();
-        }
-
-        public void SetupViewObj()
+        public void SetupView()
         {
             if (ObjectPooler.TryGetObject(Path, out var windowObj) is false)
             {
                 return;
             }
-            windowView = windowObj.GetComponent<WindowView>();
-            windowView.SetLogic(this);
-            HUD.InterfaceController.ShowWindow(windowView);
+            _windowView = windowObj.GetComponent<View>();
+            _windowView.SetLogic(this);
+            HUD.InterfaceController.ShowWindow(_windowView);
         }
 
-        protected bool TryGetWindowView<T>(out T windowView)
+        protected virtual void BackBehaviour()
         {
-            if (this.windowView != null && this.windowView is T view)
+            Close();
+        }
+
+        protected bool TryGetWindowView(out View windowView)
+        {
+            if (_windowView != null)
             {
-                windowView = view;
+                windowView = _windowView;
                 return true;
             }
             windowView = default;

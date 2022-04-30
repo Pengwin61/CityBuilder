@@ -2,13 +2,17 @@ using UnityEngine;
 
 namespace Windows
 {
-    public class WindowView : MonoBehaviour
+    public class WindowView<WindowLogic> : MonoBehaviour, IWindowView where WindowLogic : IWindowLogic
     {
-        private WindowLogic _windowLogic;
+        public WindowLogic logic;
 
-        public void SetLogic(WindowLogic windowLogic)
+
+        public void SetLogic(IWindowLogic incomeLogic)
         {
-            _windowLogic = windowLogic;
+            if (incomeLogic is WindowLogic neededLogic)
+            {
+                logic = neededLogic;
+            }
         }
 
         public void SetVisible(bool isActive)

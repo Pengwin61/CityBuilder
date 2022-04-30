@@ -8,7 +8,7 @@ namespace HUD
         [SerializeField] private Canvas _canvas;
         [SerializeField] private Transform _holder;
 
-        public void ShowWindow(WindowView windowView)
+        public void ShowWindow(IWindowView windowView)
         {
             windowView.transform.SetParent(_holder);
         }

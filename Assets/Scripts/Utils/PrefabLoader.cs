@@ -4,7 +4,7 @@ public static class PrefabLoader
 {
     public static bool TryGetObject<T>(string path, out T createdObj) where T: Object
     {
-        Utils.DebugUtils.LogError($"GetObject {path}");
+        //Utils.DebugUtils.LogError($"GetObject {path}");
         var objRes = Resources.Load<T>(path);
         if (objRes == null)
         {
