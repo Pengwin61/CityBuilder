@@ -6,7 +6,6 @@ namespace Windows.Lobby
     {
         public void OnStartClick()
         {
-            Debug.LogError($"OnStartClick");
             logic.OnStartClick();
         }
     }

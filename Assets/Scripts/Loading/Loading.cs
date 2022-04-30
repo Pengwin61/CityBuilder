@@ -79,4 +79,20 @@ namespace Loading
             return stepsLeft == 0;
         }
     }
+
+    public class LoadingAction : ILoading
+    {
+        private readonly Action _loadAction;
+
+        public LoadingAction(Action action)
+        {
+            _loadAction = action;
+        }
+
+        public UniTask Load(CancellationToken cancelLoading)
+        {
+            _loadAction?.Invoke();
+            return UniTask.CompletedTask;
+        }
+    }
 }

@@ -1,7 +1,22 @@
+using Loading;
+
 namespace Windows.Loading
 {
     public class WindowLoading : WindowLogic<LoadingView, LoadingData>
     {
+        public static void Show()
+        {
+            WindowsController.Open<WindowLoading>();
+        }
+        public static void Show(LoadingSteps loadingSteps)
+        {
+            WindowsController.Open<WindowLoading>(new LoadingData { steps = loadingSteps });
+        }
+        public static void Hide()
+        {
+            WindowsController.Close<WindowLoading>();
+        }
+
         private const string PATH = "Windows/WindowLoading";
         public override string Path => PATH;
 

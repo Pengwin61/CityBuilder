@@ -2,7 +2,6 @@ using Cysharp.Threading.Tasks;
 using Loading.Steps;
 using System.Threading;
 using UnityEngine;
-using Windows;
 using Windows.Loading;
 
 namespace Loading
@@ -16,18 +15,12 @@ namespace Loading
             _cancelLoading = new CancellationTokenSource();
 
             var mainLoading = new LoadingInTurn(
+                new ConfigStep(),
+                new PoolStep(),
+                new MainLoadingCompleteStep()
+            );
 
-                new MainLoading.LoadingTest(1500),
-                new MainLoading.LoadingTest(1000),
-                new MainLoading.LoadingTest(500),
-                new MainLoading.LoadingTest(100),
-
-                  new ConfigStep(),
-                  new PoolStep(),
-                  new MainLoadingCompleteStep()
-                 );
-
-            WindowsController.Open<WindowLoading>(new LoadingData { steps = mainLoading });
+            WindowLoading.Show(mainLoading);
             mainLoading.Load(_cancelLoading.Token).Forget();
         }
 

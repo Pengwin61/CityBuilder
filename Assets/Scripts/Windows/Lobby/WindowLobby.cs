@@ -13,17 +13,8 @@ namespace Windows.Lobby
 
         public void OnStartClick()
         {
-            var loadBattle = new LoadingInTurn(
-                new MainLoading.LoadingTest(1500),
-                new MainLoading.LoadingTest(1000),
-                new MainLoading.LoadingTest(500),
-                new MainLoading.LoadingTest(100)
-                );
+            Close();
 
-            WindowsController.Open<WindowLoading>(new LoadingData { steps = loadBattle });
-
-            var cancelLoading = new CancellationTokenSource();
-            loadBattle.Load(cancelLoading.Token).Forget();
         }
     }
 }

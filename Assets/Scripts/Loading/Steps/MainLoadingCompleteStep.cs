@@ -10,7 +10,7 @@ namespace Loading.Steps
     {
         public UniTask Load(CancellationToken cancelLoading)
         {
-            WindowsController.Close<WindowLoading>();
+            WindowLoading.Hide();
             WindowsController.Open<WindowLobby>();
             return UniTask.CompletedTask;
         }
