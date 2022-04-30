@@ -46,13 +46,6 @@ namespace Utils
         public static Coroutine DelayRealtimeAction(float seconds, Action action, MonoBehaviour onMonoBeh) =>
             DelayAction(Yielders.WaitForSecondsRealtime(seconds), action, onMonoBeh);
 
-
-        public static Coroutine Swing(Func<float, IEnumerator> action, float coeffSpeed, float duration, MonoBehaviour onMonoBeh)
-        {
-            return onMonoBeh.StartCoroutine(SwingInternal(action, coeffSpeed, duration));
-        }
-
-
         private static Coroutine DelayAction(IEnumerator yielder, Action action, MonoBehaviour onMonoBeh)
         {
             if (onMonoBeh == null || !onMonoBeh.isActiveAndEnabled)
@@ -82,26 +75,6 @@ namespace Utils
         {
             yield return yielder;
             action?.Invoke();
-        }
-
-
-        private static IEnumerator SwingInternal(Func<float, IEnumerator> action, float coeffSpeed, float duration)
-        {
-            var from = 0f;
-            var to = 1f;
-
-            action?.Invoke(from);
-            for (var t = from; t < to; t += Time.deltaTime * coeffSpeed)
-            {
-                yield return action?.Invoke(t);
-            }
-            action?.Invoke(to);
-            yield return Yielders.WaitForSeconds(duration);
-            for (var t = to; t > from; t -= Time.deltaTime * coeffSpeed)
-            {
-                yield return action?.Invoke(t);
-            }
-            action?.Invoke(from);
         }
     }
 }

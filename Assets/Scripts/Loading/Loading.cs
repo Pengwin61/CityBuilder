@@ -57,8 +57,6 @@ namespace Loading
             {
                 await UniTask.NextFrame();
             }
-            // await UniTask.WhenAll(loading);
-            //TODO: add on complete event
         }
 
         private bool IsCompleteAll(UniTask[] tasks)

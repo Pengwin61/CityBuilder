@@ -12,21 +12,25 @@ namespace Windows
             return window != null;
         }
 
-        public static bool IsOpen<Window>() where Window : IWindowLogic
+        public static bool IsOpen<Window>() 
+            where Window : IWindowLogic
         {
             return Instance._openedWindows.Any(window => window is Window);
         }
 
-        public static void Open<Window>() where Window : IWindowLogic, new()
+        public static void Open<Window>() 
+            where Window : IWindowLogic, new()
         {
             Instance.OpenInternal<Window>();
         }
-        public static void Open<Window>(IWindowData data) where Window : IWindowLogic, new()
+        public static void Open<Window>(IWindowData data) 
+            where Window : IWindowLogic, new()
         {
             Instance.OpenInternal<Window>(data);
         }
 
-        public static void Close<Window>() where Window : IWindowLogic
+        public static void Close<Window>() 
+            where Window : IWindowLogic
         {
             Instance.CloseInternal<Window>();
         }
@@ -38,31 +42,19 @@ namespace Windows
 
         private readonly List<IWindowLogic> _openedWindows = new List<IWindowLogic>();
 
-        private void OpenInternal<Window>() where Window : IWindowLogic, new()
+        private void OpenInternal<Window>() 
+            where Window : IWindowLogic, new()
         {
             OpeningWindow<Window>().Open();
         }
-        private void OpenInternal<Window>(IWindowData data = null) where Window : IWindowLogic, new()
+        private void OpenInternal<Window>(IWindowData data = null) 
+            where Window : IWindowLogic, new()
         {
             OpeningWindow<Window>().Open(data);
         }
 
-        private void CloseInternal<Window>() where Window : IWindowLogic
-        {
-            var windowToClose = _openedWindows.FirstOrDefault(window => typeof(Window) == window.GetType());
-            if (windowToClose != null)
-            {
-                windowToClose.Close();
-            }
-        }
-
-        private void OnCloseInternal(IWindowLogic windowLogic)
-        {
-            _openedWindows.Remove(windowLogic);
-            SetVisibleActiveWindow(true);
-        }
-
-        private Window OpeningWindow<Window>() where Window : IWindowLogic, new()
+        private Window OpeningWindow<Window>() 
+            where Window : IWindowLogic, new()
         {
             if (TryGetActiveWindow(out var activeWindow) &&
                 activeWindow is Window existedWindow)
@@ -82,6 +74,22 @@ namespace Windows
             {
                 activeWindow.SetVisible(isActive);
             }
+        }
+
+        private void CloseInternal<Window>()
+            where Window : IWindowLogic
+        {
+            var windowToClose = _openedWindows.FirstOrDefault(window => window is Window);
+            if (windowToClose != null)
+            {
+                windowToClose.Close();
+            }
+        }
+
+        private void OnCloseInternal(IWindowLogic windowLogic)
+        {
+            _openedWindows.Remove(windowLogic);
+            SetVisibleActiveWindow(true);
         }
     }
 }

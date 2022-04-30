@@ -2,7 +2,8 @@ using UnityEngine;
 
 namespace Windows
 {
-    public class WindowView<WindowLogic> : MonoBehaviour, IWindowView where WindowLogic : IWindowLogic
+    public class WindowView<WindowLogic> : MonoBehaviour, IWindowView 
+        where WindowLogic : IWindowLogic
     {
         public WindowLogic logic;
 
