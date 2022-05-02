@@ -1,4 +1,4 @@
-using System;
+using Pool;
 using System.Collections.Generic;
 using System.Linq;
 using Utils;
@@ -42,7 +42,6 @@ namespace Windows
         }
 
         private readonly List<IWindowLogic> _openedWindows = new List<IWindowLogic>();
-        private readonly Dictionary<Type, Stack<IWindowLogic>> _poolLogics = new Dictionary<Type, Stack<IWindowLogic>>();
 
         private void OpenInternal<Window>()
             where Window : IWindowLogic, new()
@@ -64,9 +63,9 @@ namespace Windows
                 return existedWindow;
             }
             SetVisibleActiveWindow(false);
-            var newWindow = GetFromPool<Window>();
-            _openedWindows.Add(newWindow);
-            return newWindow;
+            var logic = PoolLogics<IWindowLogic>.GetFromPool<Window>();
+            _openedWindows.Add(logic);
+            return logic;
         }
 
         private void SetVisibleActiveWindow(bool isActive)
@@ -90,34 +89,8 @@ namespace Windows
         private void OnCloseInternal(IWindowLogic windowLogic)
         {
             _openedWindows.Remove(windowLogic);
-            AddInPool(windowLogic);
+            PoolLogics<IWindowLogic>.AddInPool(windowLogic);
             SetVisibleActiveWindow(true);
-        }
-
-        private void AddInPool(IWindowLogic window)
-        {
-            var windowType = window.GetType();
-            if (_poolLogics.ContainsKey(windowType) is false)
-            {
-                _poolLogics.Add(windowType, new Stack<IWindowLogic>());
-            }
-            _poolLogics[windowType].Push(window);
-        }
-
-        private Window GetFromPool<Window>()
-            where Window : IWindowLogic, new()
-        {
-            var windowType = typeof(Window);
-            if (_poolLogics.ContainsKey(windowType) is false)
-            {
-                _poolLogics.Add(windowType, new Stack<IWindowLogic>());
-            }
-            var existedWindows = _poolLogics[windowType];
-            if (existedWindows.Count == 0)
-            {
-                return new Window();
-            }
-            return (Window)existedWindows.Pop();
         }
     }
 }

@@ -1,3 +1,5 @@
+using Battle;
+
 namespace Windows.Lobby
 {
     public class WindowLobby : WindowLogic<LobbyView>
@@ -8,6 +10,7 @@ namespace Windows.Lobby
         public void OnStartClick()
         {
             Close();
+            BattleContoller.Start<Survive>();
         }
     }
 }

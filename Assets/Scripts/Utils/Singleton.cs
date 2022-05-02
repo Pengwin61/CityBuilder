@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace Utils
 {
     public class Singleton<T> where T : class, new()
