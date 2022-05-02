@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Utils;
@@ -12,24 +13,24 @@ namespace Windows
             return window != null;
         }
 
-        public static bool IsOpen<Window>() 
+        public static bool IsOpen<Window>()
             where Window : IWindowLogic
         {
             return Instance._openedWindows.Any(window => window is Window);
         }
 
-        public static void Open<Window>() 
+        public static void Open<Window>()
             where Window : IWindowLogic, new()
         {
             Instance.OpenInternal<Window>();
         }
-        public static void Open<Window>(IWindowData data) 
-            where Window : IWindowLogic, new()
+        public static void Open<Window>(IWindowData data)
+            where Window : IWindowLogicWithData, new()
         {
             Instance.OpenInternal<Window>(data);
         }
 
-        public static void Close<Window>() 
+        public static void Close<Window>()
             where Window : IWindowLogic
         {
             Instance.CloseInternal<Window>();
@@ -41,19 +42,20 @@ namespace Windows
         }
 
         private readonly List<IWindowLogic> _openedWindows = new List<IWindowLogic>();
+        private readonly Dictionary<Type, Stack<IWindowLogic>> _poolLogics = new Dictionary<Type, Stack<IWindowLogic>>();
 
-        private void OpenInternal<Window>() 
+        private void OpenInternal<Window>()
             where Window : IWindowLogic, new()
         {
             OpeningWindow<Window>().Open();
         }
-        private void OpenInternal<Window>(IWindowData data = null) 
-            where Window : IWindowLogic, new()
+        private void OpenInternal<Window>(IWindowData data = null)
+            where Window : IWindowLogicWithData, new()
         {
             OpeningWindow<Window>().Open(data);
         }
 
-        private Window OpeningWindow<Window>() 
+        private Window OpeningWindow<Window>()
             where Window : IWindowLogic, new()
         {
             if (TryGetActiveWindow(out var activeWindow) &&
@@ -62,9 +64,8 @@ namespace Windows
                 return existedWindow;
             }
             SetVisibleActiveWindow(false);
-            var newWindow = new Window();
+            var newWindow = GetFromPool<Window>();
             _openedWindows.Add(newWindow);
-            newWindow.SetupView();
             return newWindow;
         }
 
@@ -89,7 +90,34 @@ namespace Windows
         private void OnCloseInternal(IWindowLogic windowLogic)
         {
             _openedWindows.Remove(windowLogic);
+            AddInPool(windowLogic);
             SetVisibleActiveWindow(true);
+        }
+
+        private void AddInPool(IWindowLogic window)
+        {
+            var windowType = window.GetType();
+            if (_poolLogics.ContainsKey(windowType) is false)
+            {
+                _poolLogics.Add(windowType, new Stack<IWindowLogic>());
+            }
+            _poolLogics[windowType].Push(window);
+        }
+
+        private Window GetFromPool<Window>()
+            where Window : IWindowLogic, new()
+        {
+            var windowType = typeof(Window);
+            if (_poolLogics.ContainsKey(windowType) is false)
+            {
+                _poolLogics.Add(windowType, new Stack<IWindowLogic>());
+            }
+            var existedWindows = _poolLogics[windowType];
+            if (existedWindows.Count == 0)
+            {
+                return new Window();
+            }
+            return (Window)existedWindows.Pop();
         }
     }
 }

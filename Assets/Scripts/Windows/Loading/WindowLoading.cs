@@ -2,7 +2,7 @@ using Loading;
 
 namespace Windows.Loading
 {
-    public class WindowLoading : WindowLogic<LoadingView, LoadingData>
+    public class WindowLoading : WindowLogicWithData<LoadingView, LoadingData>
     {
         public static void Show()
         {

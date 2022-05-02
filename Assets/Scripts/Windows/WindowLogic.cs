@@ -2,27 +2,17 @@ using UnityEngine;
 
 namespace Windows
 {
-    public abstract class WindowLogic<View, Data> : IWindowLogic
+    public abstract class WindowLogic<View> : IWindowLogic
         where View : Component, IWindowView
-        where Data : IWindowData
     {
         private View _windowView;
 
         public abstract string Path { get; }
-        protected abstract void Open(Data data);
 
         public virtual void Open()
         {
             SetVisible(true);
-        }
-
-        public virtual void Open(IWindowData data)
-        {
-            SetVisible(true);
-            if (data is Data loadingData)
-            {
-                Open(loadingData);
-            }
+            SetupView();
         }
 
         public virtual void Close()
@@ -39,7 +29,7 @@ namespace Windows
             }
         }
 
-        public void SetupView()
+        protected void SetupView()
         {
             if (ObjectPooler.TryGetObject(Path, out var windowObj) is false)
             {
@@ -48,11 +38,6 @@ namespace Windows
             _windowView = windowObj.GetComponent<View>();
             _windowView.SetLogic(this);
             HUD.InterfaceController.ShowWindow(_windowView);
-        }
-
-        protected virtual void BackBehaviour()
-        {
-            Close();
         }
 
         protected bool TryGetWindowView(out View windowView)
@@ -64,6 +49,11 @@ namespace Windows
             }
             windowView = default;
             return false;
+        }
+
+        protected virtual void BackBehaviour()
+        {
+            Close();
         }
     }
 }
